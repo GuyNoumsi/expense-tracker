@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import supabase from "@/lib/db";
+import { PostgrestError } from "@supabase/supabase-js";
 
 const jwtSecret = process.env.JWT_SECRET || "your-secret-key";
 
@@ -16,7 +17,7 @@ function verifyToken(request: NextRequest) {
     const decoded = jwt.verify(token, jwtSecret) as { userId: string };
     return decoded.userId;
   } catch (error) {
-    throw new Error("Token is not valid");
+    throw new Error("Token is not valid: " + error);
   }
 }
 
@@ -47,10 +48,14 @@ export async function GET(request: NextRequest) {
       console.log("Expense summary:", data);
       return NextResponse.json(data);
     }
-  } catch (error: any) {
-    console.error("Get daily summary error:", error);
-    if (error.message.includes("authorization")) {
-      return NextResponse.json({ error: error.message }, { status: 401 });
+  } catch (error) {
+    const errMsg =
+      error instanceof PostgrestError
+        ? error.message
+        : "An unknown error occurred.";
+    console.error("Get daily summary error:", errMsg);
+    if (errMsg.includes("authorization")) {
+      return NextResponse.json({ error: errMsg }, { status: 401 });
     }
     return NextResponse.json(
       { error: "Failed to retrieve daily summary" },

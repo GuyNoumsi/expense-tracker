@@ -45,8 +45,10 @@ export default function LoginPage() {
 
       login(data.token, data.user);
       router.push("/");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (error) {
+      const errMsg =
+        error instanceof Error ? error.message : "An unknown error occurred.";
+      setError(errMsg);
     } finally {
       setIsLoading(false);
     }
@@ -170,7 +172,7 @@ export default function LoginPage() {
 
               <div className="text-center pt-4">
                 <p className="text-white/70 text-sm">
-                  Don't have an account?{" "}
+                  Don&apos;t have an account?{" "}
                   <Link
                     href="/register"
                     className="text-purple-300 hover:text-purple-200 font-medium transition-colors duration-200 underline-offset-4 hover:underline"

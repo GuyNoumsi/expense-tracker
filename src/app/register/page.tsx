@@ -16,15 +16,7 @@ import Link from "next/link";
 import { useAuth } from "../../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import {
-  Eye,
-  EyeOff,
-  Lock,
-  User,
-  Mail,
-  Sparkles,
-  CheckCircle,
-} from "lucide-react";
+import { Eye, EyeOff, Lock, User, Mail, CheckCircle } from "lucide-react";
 
 export default function RegisterPage() {
   const [username, setUsername] = useState("");
@@ -57,8 +49,10 @@ export default function RegisterPage() {
       // Assuming the API returns the token and user data
       register(data.token, data.user);
       router.push("/");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      const errMsg =
+        err instanceof Error ? err.message : "An unknown error occurred.";
+      setError(errMsg);
     } finally {
       setIsLoading(false);
     }

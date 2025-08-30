@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import supabase from "@/lib/db";
 import jwt from "jsonwebtoken";
 
+type ExpenseRouteContext = { params: { id: string } };
 const jwtSecret = process.env.JWT_SECRET || "your-secret-key";
 
 // Helper function to verify JWT token
@@ -16,33 +17,27 @@ function verifyToken(request: NextRequest) {
     const decoded = jwt.verify(token, jwtSecret) as { userId: string };
     return decoded.userId;
   } catch (error) {
-    throw new Error("Token is not valid");
+    throw new Error(`Token is not valid: ${error}`);
   }
 }
 
 // PUT /api/expenses/[id] - Update an expense
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, context: unknown) {
+  const { id } = (context as ExpenseRouteContext).params;
   const userId = verifyToken(request);
-  const expenseId = parseInt(params.id);
+  const expenseId = parseInt(id);
+
   const { amount, description, category, created_at } = await request.json();
 
   const { data, error } = await supabase
     .from("expenses")
-    .update({
-      amount,
-      description,
-      category,
-      created_at,
-    })
+    .update({ amount, description, category, created_at })
     .eq("id", expenseId)
     .eq("user_id", userId)
-    .select(); // RETURNING *
+    .select();
 
   if (!error) {
-    if (data.length === 0) {
+    if (!data || data.length === 0) {
       return NextResponse.json(
         {
           error: "Expense not found or you do not have permission to edit it.",
@@ -50,27 +45,24 @@ export async function PUT(
         { status: 404 }
       );
     }
-
     return NextResponse.json(data[0]);
-  } else {
-    console.error("Update expense error:", error);
-    if (error.message.includes("authorization")) {
-      return NextResponse.json({ error: error.message }, { status: 401 });
-    }
-    return NextResponse.json(
-      { error: "Failed to update expense" },
-      { status: 500 }
-    );
   }
+
+  console.error("Update expense error:", error);
+  if (error.message.includes("authorization")) {
+    return NextResponse.json({ error: error.message }, { status: 401 });
+  }
+  return NextResponse.json(
+    { error: "Failed to update expense" },
+    { status: 500 }
+  );
 }
 
 // DELETE /api/expenses/[id] - Delete an expense
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, context: unknown) {
+  const { id } = (context as ExpenseRouteContext).params;
   const userId = verifyToken(request);
-  const expenseId = parseInt(params.id);
+  const expenseId = parseInt(id);
 
   const { data, error } = await supabase
     .from("expenses")

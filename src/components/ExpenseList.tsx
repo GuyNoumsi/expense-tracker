@@ -48,13 +48,15 @@ export default function ExpenseList({
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete expense");
+        throw new Error(response.statusText);
       }
       toast.success("Expense deleted successfully!");
       onExpenseDeleted();
-    } catch (error: any) {
-      toast.error("Failed to delete expense. " + error.message);
-      console.error("Error deleting expense:", error);
+    } catch (error: unknown) {
+      const errMsg =
+        error instanceof Error ? error.message : "An unknown error occurred.";
+      toast.error("Failed to delete expense. ");
+      console.error("Error deleting expense:", errMsg);
     } finally {
       setIsDeleting(null);
     }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import supabase from "@/lib/db";
 import jwt from "jsonwebtoken";
+import { PostgrestError } from "@supabase/supabase-js";
 
 const jwtSecret = process.env.JWT_SECRET || "your-secret-key";
 
@@ -16,7 +17,7 @@ function verifyToken(request: NextRequest) {
     const decoded = jwt.verify(token, jwtSecret) as { userId: string };
     return decoded.userId;
   } catch (error) {
-    throw new Error("Token is not valid");
+    throw new Error("Token is not valid: " + error);
   }
 }
 
@@ -37,10 +38,14 @@ export async function GET(request: NextRequest) {
     } else {
       throw error;
     }
-  } catch (error: any) {
+  } catch (error) {
+    const errMsg =
+      error instanceof PostgrestError
+        ? error.message
+        : "An unknown error occurred.";
     console.error("Get categories error:", error);
-    if (error.message.includes("authorization")) {
-      return NextResponse.json({ error: error.message }, { status: 401 });
+    if (errMsg.includes("authorization")) {
+      return NextResponse.json({ error: errMsg }, { status: 401 });
     }
     return NextResponse.json(
       { error: "Failed to retrieve categories" },
@@ -72,12 +77,16 @@ export async function POST(request: NextRequest) {
     } else {
       throw error;
     }
-  } catch (error: any) {
+  } catch (error) {
+    const errMsg =
+      error instanceof PostgrestError
+        ? error.message
+        : "An unknown error occurred.";
     console.error("Add category error:", error);
-    if (error.message.includes("authorization")) {
-      return NextResponse.json({ error: error.message }, { status: 401 });
+    if (errMsg.includes("authorization")) {
+      return NextResponse.json({ error: errMsg }, { status: 401 });
     }
-    if (error.code === "23505") {
+    if (error instanceof PostgrestError && error.code === "23505") {
       // PostgreSQL unique violation error code
       return NextResponse.json(
         { error: "Category already exists" },
@@ -126,10 +135,14 @@ export async function DELETE(request: NextRequest) {
     } else {
       throw error;
     }
-  } catch (error: any) {
+  } catch (error) {
+    const errMsg =
+      error instanceof PostgrestError
+        ? error.message
+        : "An unknown error occurred.";
     console.error("Delete category error:", error);
-    if (error.message.includes("authorization")) {
-      return NextResponse.json({ error: error.message }, { status: 401 });
+    if (errMsg.includes("authorization")) {
+      return NextResponse.json({ error: errMsg }, { status: 401 });
     }
     return NextResponse.json(
       { error: "Failed to delete category" },

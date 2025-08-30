@@ -16,7 +16,7 @@ function verifyToken(request: NextRequest) {
     const decoded = jwt.verify(token, jwtSecret) as { userId: string };
     return decoded.userId;
   } catch (error) {
-    throw new Error("Token is not valid");
+    throw new Error("Token is not valid: " + error);
   }
 }
 
@@ -47,10 +47,12 @@ export async function GET(request: NextRequest) {
       console.log("Expenses by category:", data);
       return NextResponse.json(data);
     }
-  } catch (error: any) {
+  } catch (error) {
+    const errMsg =
+      error instanceof Error ? error.message : "An unknown error occurred.";
     console.error("Get category summary error:", error);
-    if (error.message.includes("authorization")) {
-      return NextResponse.json({ error: error.message }, { status: 401 });
+    if (errMsg.includes("authorization")) {
+      return NextResponse.json({ error: errMsg }, { status: 401 });
     }
     return NextResponse.json(
       { error: "Failed to retrieve category summary" },

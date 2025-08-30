@@ -42,6 +42,7 @@ export interface Expense {
   description: string;
   category: string;
   created_at: string;
+  [key: string]: string | number;
 }
 
 interface ReportData {
@@ -147,7 +148,7 @@ export default function Home() {
     const csvRows = expenses.map((expense) =>
       headers
         .map((header) => {
-          const value = (expense as any)[header];
+          const value = expense[header];
           // Simple double-quote for values that contain commas
           return `"${value}"`;
         })

@@ -10,6 +10,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  TooltipProps,
 } from "recharts";
 import { format } from "date-fns";
 
@@ -26,15 +27,21 @@ const formatXAxis = (tickItem: string) => {
   return format(date, "MMM d");
 };
 
-const CustomTooltip = ({ active, payload, label }: any) => {
-  if (active && payload && payload.length) {
+const CustomTooltip = (props: TooltipProps<number, string>) => {
+  const { active, payload, label } = props as {
+    active?: boolean;
+    payload?: Array<{ value: number }>;
+    label?: string;
+  };
+
+  if (active && payload && payload.length && label) {
     return (
       <div className="bg-white p-2 border rounded shadow">
         <p className="text-sm text-gray-500">
           {format(new Date(label), "PPP")}
         </p>
         <p className="text-lg font-semibold text-blue-600">
-          ${parseFloat(payload[0].value).toFixed(2)}
+          ${payload[0].value.toFixed(2)}
         </p>
       </div>
     );

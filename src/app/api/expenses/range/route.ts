@@ -16,7 +16,7 @@ function verifyToken(request: NextRequest) {
     const decoded = jwt.verify(token, jwtSecret) as { userId: string };
     return decoded.userId;
   } catch (error) {
-    throw new Error("Token is not valid");
+    throw new Error("Token is not valid: " + error);
   }
 }
 

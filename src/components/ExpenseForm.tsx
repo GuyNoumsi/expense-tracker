@@ -31,7 +31,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { format, parseISO } from "date-fns";
@@ -145,9 +144,11 @@ export default function ExpenseForm({
       fetchUserCategories();
       setNewCategoryName("");
       setIsDialogOpen(false);
-    } catch (error: any) {
+    } catch (error) {
+      const errMsg =
+        error instanceof Error ? error.message : "An unknown error occurred.";
       console.error("Error adding category:", error);
-      toast.error(error.message);
+      toast.error(errMsg);
     } finally {
       setIsAddingCategory(false);
     }
@@ -189,9 +190,11 @@ export default function ExpenseForm({
       toast.success("Category deleted successfully!");
       fetchUserCategories(); // Refresh the category list
       onExpenseAdded(); // Trigger a full data refresh on the main page
-    } catch (error: any) {
+    } catch (error) {
+      const errMsg =
+        error instanceof Error ? error.message : "An unknown error occurred.";
       console.error("Error deleting category:", error);
-      toast.error(error.message);
+      toast.error(errMsg);
     }
   };
 
@@ -245,9 +248,11 @@ export default function ExpenseForm({
         setCategory("");
         setDate(new Date());
       }
-    } catch (error: any) {
-      toast.error("Failed to save expense. " + error.message);
-      console.error("Error saving expense:", error);
+    } catch (error) {
+      const errMsg =
+        error instanceof Error ? error.message : "An unknown error occurred.";
+      toast.error("Failed to save expense. ");
+      console.error("Error saving expense:", errMsg);
     } finally {
       setIsSubmitting(false);
     }
