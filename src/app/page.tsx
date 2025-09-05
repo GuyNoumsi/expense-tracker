@@ -30,6 +30,8 @@ import {
   startOfYear,
   endOfYear,
   subDays,
+  startOfDay,
+  endOfDay,
 } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useAuth } from "../../context/AuthContext";
@@ -98,8 +100,8 @@ export default function Home() {
     if (!token || !dateRange?.from || !dateRange?.to) return;
 
     setDataIsLoading(true);
-    const formattedStartDate = format(dateRange.from, "yyyy-MM-dd");
-    const formattedEndDate = format(dateRange.to, "yyyy-MM-dd");
+    const formattedStartDate = startOfDay(dateRange.from).toISOString(); //format(dateRange.from, "yyyy-MM-dd");
+    const formattedEndDate = endOfDay(dateRange.to).toISOString(); //format(dateRange.to, "yyyy-MM-dd");
 
     try {
       const headers = { Authorization: token };
@@ -277,7 +279,7 @@ export default function Home() {
                       id="date"
                       variant="outline"
                       className={cn(
-                        "w-[300px] justify-start text-left font-normal bg-white/10 border-white/20 text-white hover:bg-white/20",
+                        "sm:w-[100px] md:w-[400px] lg:w-[500px]  justify-start text-left font-normal bg-white/10 border-white/20 text-white hover:bg-white/20",
                         !dateRange && "text-white/50"
                       )}
                     >
@@ -312,7 +314,7 @@ export default function Home() {
                 </Popover>
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {quickSelects.map((option) => (
                   <Button
                     key={option.label}
